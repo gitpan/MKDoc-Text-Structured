@@ -1,5 +1,10 @@
 Revision history for MKDoc::Text::Structured
 
+0.3 Tue Feb 17 12:19:41 2004
+    - Fixed somehow broken nested lists
+    - Fixed unordered list / strong issues
+    - Fixed definition lists
+
 0.2 Sat Jan 31 13:24:02 2004
     - Added support for nested lists
     - Added support for <h1>

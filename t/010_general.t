@@ -34,8 +34,8 @@ No crazy markup, just the simple, basic stuff working, and
 fast. Try it!
 EOF
 
-my $res = MKDoc::Text::Structured::process ($text);
 
+my $res = MKDoc::Text::Structured::process ($text);
 
 like ($res, qr/<h2>The MKDoc::Text::Structured module<\/h2>/);
 like ($res, qr/<h3>Reasonable<\/h3>/);

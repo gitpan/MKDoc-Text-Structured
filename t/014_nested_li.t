@@ -8,17 +8,40 @@ use strict;
 my $text = <<EOF;
 * one
   * one - one
+
   * one - two
     1. one
+
+
     2. two
+
     2. three
   * one - three
 * two
+  stuff stuff
+  stuff stuff stuff
 * three
   1. three - one
   2. three - two
   3. three - three
 * four 
+
+this is a paragraph
+
+EOF
+
+my $text = <<EOF;
+* two
+  stuff stuff
+  stuff stuff stuff
+* three
+  1. three - one
+  2. three - two
+  3. three - three
+* four 
+
+this is a paragraph
+
 EOF
 
 my $expected = <<EOF;

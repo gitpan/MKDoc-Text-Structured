@@ -28,7 +28,7 @@ use warnings;
 
 
 our $Text    = '';
-our $VERSION = 0.2;
+our $VERSION = 0.3;
 
 
 sub process
@@ -47,12 +47,6 @@ sub process
     _make_h2();
     _make_h3();
     _make_lists();
-    _make_ol();
-
-    # at the moment we don't want to do anything
-    # with whitespace following carriage returns
-    # might change later.
-    # $Text =~ s/\n( |\t)+/\n/g;
     _make_blockquote();
     _make_dl();
     _make_pre();
@@ -76,7 +70,7 @@ sub process
     
     my $res = join "\n", @res;
     $res =~ s/&slash;/\//g;
-    return $res;
+    return "<div>$res</div>";
 }
 
 
@@ -99,12 +93,12 @@ sub _make_dl
 {
 
     while ($Text =~ s/
-(                  # begin capture
+(                      # begin capture
 (?:
-  \n+.+?\:         #   ^line like this:
-  (?:\n\s+.*)      #   ^  one or more lines like this 
-)+                 # one or more times
-)                  # end capture
+  \n+.+?\:             #   ^line like this:
+  (?:\n[ \t]+[^\n]+)+  #   ^  one or more lines like this 
+)+                     # one or more times
+)                      # end capture
 /_make_dl_wrap ($1)/ex) {}
 
 }
@@ -192,14 +186,26 @@ sub _make_lists
 
 sub _make_ul
 {
-    while ($Text =~ s/((?:\n+\*\s*.*)+)/_make_ul_wrap ($1)/se) {}
+    while ($Text =~ s/((?:\n+\*\s.*)+)/_make_ul_wrap ($1)/e) {}
 }
 
 
 sub _make_ul_wrap
 {
-    my $stuff = shift;
-    while ( $stuff =~ s/\n+\*\s*(.*)/\n\n<li>$1<\/li>\n\n/ ) {}
+    my $stuff = "\n" . shift() . "\n";
+    $stuff =~ s/\n\*\s+/\n\n\* /g;
+    
+    my @stuff = split /\n\n+/, $stuff;
+
+    for (@stuff)
+    {
+        /^\*\s/ || next;
+        s/\n\s+/\n/g; 
+        s/^\*\s/\n\n<li>/;
+        s/$/<\/li>\n\n/;
+    }
+
+    $stuff = join '', @stuff;
     $stuff = _make_sublists ($stuff);
     return "\n\n<ul>\n\n$stuff\n\n</ul>\n\n";
 }
@@ -213,8 +219,19 @@ sub _make_ol
 
 sub _make_ol_wrap
 {
-    my $stuff = shift;
-    while ( $stuff =~ s/\n+\d+\.\s*(.*)/\n\n<li>$1<\/li>\n\n/ ) {}
+    my $stuff = "\n" . shift() . "\n";
+    $stuff =~ s/\n\d+\.\s+/\n\n1\. /g;
+  
+    my @stuff = split /\n\n+/, $stuff;
+
+    for (@stuff)
+    {
+        /^\d+\.\s/ || next;
+        s/\n\s+/\n/g; 
+        s/^\d+\.\s/\n\n<li>/;
+        s/$/<\/li>\n\n/;
+    }
+    $stuff = join '', @stuff;
     $stuff = _make_sublists ($stuff);
     return "\n\n<ol>\n\n$stuff\n\n</ol>\n\n";
 }
@@ -312,6 +329,10 @@ sub _make_sublists
 {
     my $stuff  = shift;
     my @blocks = split /\n\n+/, $stuff;
+    for (@blocks) { $_ =~ /^</ and do { $_ = "\n$_\n" } }
+
+    $stuff = join "\n", @blocks;
+    @blocks = split /\n\n+/, $stuff;
 
     my @res = ();
     while (scalar @blocks)
@@ -341,7 +362,8 @@ sub _make_sublists
         _make_lists();
 
         $block =~ s/<\/li>/$Text<\/li>/;
-        push @res, $block; 
+        push @res, $block;
+	shift (@blocks);
     }
 
     return join "\n\n", @res;

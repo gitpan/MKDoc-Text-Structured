@@ -22,3 +22,5 @@ t/014_nested_li.t
 t/015_pre.t
 t/016_dl.t
 t/017_blockquote.t
+t/100_strong_li.t
+t/101_definition_list.t
