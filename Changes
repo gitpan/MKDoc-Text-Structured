@@ -1,5 +1,16 @@
 Revision history for MKDoc::Text::Structured
 
+0.5 Sun Jul 11 18:00:25 2004
+    - Re-wrote the parsing engine, now clean and robust
+    - Re-did the entire test suite
+    - Re-vamped docs
+    - This is like a new module! :-)
+
+0.4 Fri Jul  9 17:33:06 2004
+    - Fixed some blockquote issues
+    - Removed support for definition lists
+    - Changed list support to EtText list module
+
 0.3 Tue Feb 17 12:19:41 2004
     - Fixed somehow broken nested lists
     - Fixed unordered list / strong issues
