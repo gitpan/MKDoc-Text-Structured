@@ -16,7 +16,7 @@ lib/MKDoc/Text/Structured/SIG.pm
 lib/MKDoc/Text/Structured/UL.pm
 Makefile.PL
 MANIFEST			This list of files
-META.yml			Module meta-data (added by MakeMaker)
+META.yml
 README
 t/001_p.t
 t/002_h1_h2_h3.t
@@ -28,3 +28,4 @@ t/007_em_across.t
 t/008_blockquote.t
 t/010_ul.t
 t/011_ol.t
+t/012_spaces_only.t
