@@ -1,0 +1,19 @@
+Changes
+MANIFEST			This list of files
+Makefile.PL
+README
+example/example.pl
+example/example.txt
+lib/MKDoc/Text/Structured.pm
+t/000_p.t
+t/001_h2.t
+t/002_h3.t
+t/003_li.t
+t/004_ol.t
+t/005_strong.t
+t/006_em.t
+t/007_tokenize.t
+t/010_general.t
+t/011_list_and_bold.t
+t/012_list_carriage_return.t
+t/013_strong_and_em.t

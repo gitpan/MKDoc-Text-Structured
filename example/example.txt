@@ -1,0 +1,56 @@
+MKDoc::Text::Structured
+======================
+
+MKDoc::Text::Structured is a module which turns structured text
+into clean XHTML. This current piece of text is a valid structured
+text fragment.
+
+As you can see, MKDoc::Text::Structured has been designed to be
+as *simple* and as *natural to use* as possible: you use it how
+you would type a text email or a newsgroups post.
+
+MKDoc::Text::Structured supports a few simple constructs:
+
+
+Unordered Bulleted lists
+------------------------
+
+* This is a list.
+* It has some elements.
+
+* You can also have extra carriage returns between bullet points.
+
+
+Ordered bullets lists
+---------------------
+
+1. Same as above
+
+65451. The number doesn't matter
+
+1. As long as each sentence starts with number dot space
+
+
+Miscelleanous
+-------------
+
+MKDoc::Text::Structured allows you to /emphasize on certain
+expressions/. Even though you can use slashes, the module should
+be intelligent enough not to emphasize anything if you're talking
+about the popular website /. See? /. /. /..
+
+Also URLs should be OK: 
+
+* http://example.com/foo/ (not emphasized)
+* /http://example.com/foo//
+
+By the way, you can also use underscores instead of slashes.
+_this is emphasized too, you see_.
+
+Symetrically, you can use stars to *put things in bold*.
+Again you should be pretty safe:
+
+    3*3*2 = 18
+
+Lastly, you cannot do hyperlinks with this module. It will be
+the job of another MKDoc module.
