@@ -1,5 +1,8 @@
 Revision history for MKDoc::Text::Structured
 
+0.6 Mon Jul 12 16:54:01 2004
+    - Added DOS + Mac garbled carriage return stripping
+
 0.5 Sun Jul 11 18:00:25 2004
     - Re-wrote the parsing engine, now clean and robust
     - Re-did the entire test suite

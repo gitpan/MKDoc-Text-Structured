@@ -25,13 +25,19 @@ use MKDoc::Text::Structured::Factory;
 use strict;
 use warnings;
 
-our $VERSION = 0.5;
 our $Text    = '';
+our $VERSION = 0.6;
 
 
 sub process
 {
     my $text    = shift;
+
+    # Mac + DOS carriage returns -> bang!
+    $text =~ s/\r\n/\n/gs;
+    $text =~ s/\r/\n/gs;
+
+
     my @lines   = split /\n/, $text;
     my @result  = ();
     my $current = undef;
