@@ -26,7 +26,7 @@ use strict;
 use warnings;
 
 our $Text    = '';
-our $VERSION = 0.81;
+our $VERSION = 0.82;
 
 
 sub process

@@ -1,5 +1,8 @@
 Revision history for MKDoc::Text::Structured
 
+0.82 Thu Mar 31 13:45:00 2005
+    - fixed failure to change " to &quot; bug
+
 0.81 Wed Mar 30 15:00:00 2005
     - removed defunct email address
     - Documented entity substitution

@@ -1,7 +1,7 @@
 use warnings;
 use strict;
 use Test::More 'no_plan';
-use lib qw (lib ../lib);
+use lib ('lib', '../lib');
 use MKDoc::Text::Structured;
 
 my $text = undef;
@@ -15,10 +15,13 @@ is ($text, "<p>'' ''' '' ''''</p>");
 
 
 $text = MKDoc::Text::Structured::process ('"let"s see if simple "" smart quotes work"');
-is ($text, '<p>&ldquo;let"s see if simple "" smart quotes work&rdquo;</p>');
+is ($text, '<p>&ldquo;let&quot;s see if simple &quot;&quot; smart quotes work&rdquo;</p>');
 
 $text = MKDoc::Text::Structured::process ('"" """ "" """"');
-is ($text, '<p>"" """ "" """"</p>');
+is ($text, '<p>&quot;&quot; &quot;&quot;&quot; &quot;&quot; &quot;&quot;&quot;&quot;</p>');
+
+$text = MKDoc::Text::Structured::process ('"<QUOT>"');
+is ($text, '<p>&ldquo;&lt;QUOT&gt;&rdquo;</p>');
 
 $text = MKDoc::Text::Structured::process ("This is a test: http://www.google.com/");
 is ($text, '<p>This is a test: <a href="http://www.google.com/">http://www.google.com/</a></p>');
@@ -43,6 +46,15 @@ is ($text, '<p>&hellip; (&hellip;) &hellip; .... ..</p>');
 
 $text = MKDoc::Text::Structured::process ("ACLU(American Civil Liberties Union)");
 is ($text, '<p><abbr title="American Civil Liberties Union">ACLU</abbr></p>');
+
+$text = MKDoc::Text::Structured::process ('FART(Fat Australian "Red Tigers)');
+is ($text, '<p><abbr title="Fat Australian &quot;Red Tigers">FART</abbr></p>');
+
+$text = MKDoc::Text::Structured::process ('FART(Fat Australian "Red" Tigers)');
+is ($text, '<p><abbr title="Fat Australian &ldquo;Red&rdquo; Tigers">FART</abbr></p>');
+
+$text = MKDoc::Text::Structured::process ('FART(Fat Australian &<>Red Tigers)');
+is ($text, '<p><abbr title="Fat Australian &amp;&lt;&gt;Red Tigers">FART</abbr></p>');
 
 $text = MKDoc::Text::Structured::process ("ACLU (American Civil Liberties Union)");
 is ($text, '<p><abbr title="American Civil Liberties Union">ACLU</abbr> (American Civil Liberties Union)</p>');

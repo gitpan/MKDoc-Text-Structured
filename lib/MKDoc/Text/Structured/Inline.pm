@@ -76,6 +76,7 @@ sub _make_entities
     $Text   =~ s/&/&amp;/g;
     $Text   =~ s/</&lt;/g;
     $Text   =~ s/>/&gt;/g;
+    $Text   =~ s/"/&quot;/g;
 
     $Text =~ s/(?<=(?:\s|\n))--(?=(?:\s|\n))/\&mdash;/g;                                 # --    becomes em-dash 
     $Text =~ s/(?<=(?:\s|\n))-(?=(?:\s|\n))/\&ndash;/g;                                  # -     becomes en-dash
@@ -144,6 +145,8 @@ sub _make_doublequotes
     $Text = join '', map {
 	my $stuff = $_;
 	$stuff = " $stuff ";
+        $stuff =~ s/"/<QUOT>/g;
+        $stuff =~ s/&quot;/"/g;
 	while ($stuff =~ s/
 (?<=(?:\s|\n))                            # must start with space or carriage return
 \"                                        # double quote 
@@ -154,6 +157,8 @@ sub _make_doublequotes
 	
 	$stuff =~ s/^ //;
 	$stuff =~ s/ $//;
+        $stuff =~ s/"/&quot;/g;
+        $stuff =~ s/<QUOT>/"/g;
 	$stuff;
     } _tokenize ($Text);
 }
