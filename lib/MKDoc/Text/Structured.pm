@@ -28,7 +28,7 @@ use warnings;
 
 
 our $Text    = '';
-our $VERSION = 0.1;
+our $VERSION = 0.2;
 
 
 sub process
@@ -42,20 +42,23 @@ sub process
     $Text =~ s/>/&gt;/g;
     $Text =~ s/\//&slash;/g;
     
+    # block level stuff
+    _make_h1();
+    _make_h2();
+    _make_h3();
+    _make_lists();
+    _make_ol();
+
     # at the moment we don't want to do anything
     # with whitespace following carriage returns
     # might change later.
-    $Text =~ s/\n( |\t)+/\n/g;
-    
-    # block level stuff
-    _make_h2();
-    _make_h3();
-    _make_li();
-    _make_ol();
+    # $Text =~ s/\n( |\t)+/\n/g;
+    _make_blockquote();
+    _make_dl();
+    _make_pre();
     _make_p();
     
     # split each block level
-
     my @res = ();
 
     my @blocks = split /\n\n+/, $Text;
@@ -69,7 +72,7 @@ sub process
 	_make_strong();
 	_make_em();
 	push @res, $Text;
-    }
+   }
     
     my $res = join "\n", @res;
     $res =~ s/&slash;/\//g;
@@ -77,7 +80,97 @@ sub process
 }
 
 
-# block level methods
+sub _make_blockquote
+{
+    while ($Text =~ s/((?:\n+\&gt\;.*)+)/_make_blockquote_wrap ($1)/e) {}
+}
+
+sub _make_blockquote_wrap
+{
+    my $stuff = shift;
+    $stuff =~ s/\n+\&gt\;\s*/\n/g;
+    local $Text = $stuff;
+    _make_blockquote();
+    return "\n\n<blockquote>$Text</blockquote>\n\n";
+}
+
+
+sub _make_dl
+{
+
+    while ($Text =~ s/
+(                  # begin capture
+(?:
+  \n+.+?\:         #   ^line like this:
+  (?:\n\s+.*)      #   ^  one or more lines like this 
+)+                 # one or more times
+)                  # end capture
+/_make_dl_wrap ($1)/ex) {}
+
+}
+
+
+sub _make_dl_wrap
+{
+    my $stuff = shift;
+    my @items = $stuff =~ /
+  \n+(.+?)\:       #   ^line like this:
+  (\n\s+.*)      #   ^  one or more lines like this
+/xg;
+   
+    for (@items) { s/^(\s+|\n)+//; s/(\s+|\n)+$//; s/\s+/ /g }
+
+    my @res = ();
+    push @res, "\n\n<dl>\n";
+    while (scalar @items)
+    {
+        my $dt = shift (@items);
+        my $dd = shift (@items);
+        push @res, "\n<dt>$dt</dt>\n";
+        push @res, "\n<dd>$dd</dd>\n";
+    }
+    push @res, "\n</dl>\n";
+
+    return join '', @res;
+}
+
+
+sub _make_pre
+{
+    my @lines = split "\n", $Text;
+    my @res   = ();
+    while (scalar @lines)
+    {
+        my $line = shift (@lines);
+        $line =~ /^\s+\S/ or do {
+            push @res, $line;
+            next;
+        };
+
+        my ($indent) = $line =~ /^(\s+)\S/;
+        my @pre = ();
+        while ($line =~ s/^$indent//)
+        {
+            push @pre, $line;
+            $line = shift (@lines);
+        }
+
+        my $pre = join "\n", @pre;
+        push @res, "\n\n<pre>$pre</pre>\n\n";
+        push @res, $line;
+    }
+    
+    $Text = join "\n", @res;
+    $Text = "\n\n$Text\n\n";
+}
+
+
+sub _make_h1
+{
+    while ($Text =~ s/\n\=\=\=+\s*\n(.+)\n\=\=\=+\s*\n/\n\n<h1>$1<\/h1>\n\n/) {}
+}
+
+
 sub _make_h2
 {
     while ($Text =~ s/\n(.+)\n\=\=\=+\s*\n/\n\n<h2>$1<\/h2>\n\n/) {}
@@ -90,16 +183,24 @@ sub _make_h3
 }
 
 
-sub _make_li
+sub _make_lists
 {
-    while ($Text =~ s/((?:\n+\*\s*.*)+)/_make_li_wrap ($1)/e) {}
+    _make_ul();
+    _make_ol();
 }
 
 
-sub _make_li_wrap
+sub _make_ul
+{
+    while ($Text =~ s/((?:\n+\*\s*.*)+)/_make_ul_wrap ($1)/se) {}
+}
+
+
+sub _make_ul_wrap
 {
     my $stuff = shift;
     while ( $stuff =~ s/\n+\*\s*(.*)/\n\n<li>$1<\/li>\n\n/ ) {}
+    $stuff = _make_sublists ($stuff);
     return "\n\n<ul>\n\n$stuff\n\n</ul>\n\n";
 }
 
@@ -114,6 +215,7 @@ sub _make_ol_wrap
 {
     my $stuff = shift;
     while ( $stuff =~ s/\n+\d+\.\s*(.*)/\n\n<li>$1<\/li>\n\n/ ) {}
+    $stuff = _make_sublists ($stuff);
     return "\n\n<ol>\n\n$stuff\n\n</ol>\n\n";
 }
 
@@ -206,6 +308,46 @@ sub _tokenize
 }
 
 
+sub _make_sublists
+{
+    my $stuff  = shift;
+    my @blocks = split /\n\n+/, $stuff;
+
+    my @res = ();
+    while (scalar @blocks)
+    {
+        my $block = shift (@blocks);
+        $block =~ /^</ or do {
+            push @res, $block;
+            next;
+        };
+
+        my $next_block = $blocks[0];
+        $next_block and $next_block !~ /^</ or do {
+            push @res, $block;
+            next;
+        };
+
+        my ($indent) = $next_block =~ /\n(\s+)(?:\*|\d+\.)/;
+        $indent || do {
+            push @res, $block;
+            next;
+        };
+
+        $next_block = "\n$next_block\n";
+        while ($next_block =~ s/\n$indent(\*|\d+\.)/\n$1/) {}
+ 
+        local $Text = $next_block;
+        _make_lists();
+
+        $block =~ s/<\/li>/$Text<\/li>/;
+        push @res, $block; 
+    }
+
+    return join "\n\n", @res;
+}
+
+
 1;
 
 
@@ -215,6 +357,19 @@ __END__
 =head1 CONSTRUCTS
 
 
+=head1 Titles
+
+Titles are represented as follows:
+
+    =========================
+    This is a beautiful title
+    =========================
+
+Titles are transformed using <h1> tags:
+
+    <h1>This is a beautiful title</h1>
+
+
 =head2 Sections
 
 Sections are represented as follows:
@@ -222,22 +377,19 @@ Sections are represented as follows:
     This is a section
     =================
 
-Which produces:
+Sections are transformed using <h2> tags:
 
     <h2>This is a section</h2>
-
-Note: There is no way to do H1 since this is used by MKDoc for the
-title of the document.
 
 
 =head2 Sub-sections
 
-H3's are represented as follows:
+Sub-sections are represented as follows:
 
     This is a sub-section
     ---------------------
 
-Which produces:
+Sub-sections are transformed using <h3> tags:
 
     <h3>This is a sub-section</h3>
 
@@ -254,54 +406,70 @@ with a carriage return.
     This is a second paragraph, which has more interesting
     stuff to say. It's very good, too.
 
-Would produce:
-
-    <p>This is a first paragraph which has lots of
-    interesting stuff, including an exclusive outlook
-    on things and other ghizmos.</p>
-
-    <p>This is a second paragraph, which has more interesting
-    stuff to say. It's very good, too.</p>
+Paragraphs are transformed using <p> tags.
 
 
-=head2 Bulleted Lists
+=head2 Quoted text
 
-Bulleted lists can be constructed as follows:
+Quoted blocks are used usually to quote somebody:
+
+    This is a paragraph:
+
+    > > Ahha! This is some nested quoted text!
+    > > Cool huh?
+    > Of course, this is not nested.
+    This is another paragraph.
+
+Quoted blocks are transformed using <blockquote> tags.
+ 
+
+=head2 Preformatted text
+
+Preformatted text is pretty much like written in text emails or
+POD documentation.
+
+    This is a paragraph.
+
+        This is some <pre> text.
+        I can do ASCII art in there and it'll work.
+        Proof:
+           -.-
+            ^
+
+    This is another paragraph.
+
+Preformatted text is transformed using <pre> tags.
+
+
+=head2 Definition lists
+
+Definition lists can be constructed as follow.
+
+    Orange:
+      Round fruit with orange color
+ 
+    Banana:
+      Bent fruit with yellow color
+ 
+    Apple:
+      Round crunchy fruit with green,
+      yellow or red color
+
+They are transformed using <dl> <dt> and <dd> tags.
+
+
+=head2 Ordered and unordered lists
+
+Ordered lists and unordered lists can be constructed as follows:
 
     * An item
     * Another item
+        1. A sub-item
+        2. Another sub-item
+        3. Yet another sub-item
     * Yet another item
 
-Which would produce:
-
-    <ul>
-      <li>An item</li>
-      <li>Another item</li>
-      <li>Yet another item</li>
-    </ul>
-
-Note: L<MKDoc::Text::Structured> does not support nested lists.
-I have no idea on how to support this with the current implementation.
-Patches are always welcome :)
-
-
-=head2 Ordered Lists
-
-Ordered lists can be constructed as follows:
-
-    1. An item
-    2. Another item
-    3. Yet another item
-
-Which would produce:
-
-    <ol>
-      <li>An item</li>
-      <li>Another item</li>
-      <li>Yet another item</li>
-    </ol>
-
-Note: Same remark as above.
+They are transformed using <ul>, <ol> and <li> tags.
 
 
 =head2 Strong / Bold
@@ -310,16 +478,18 @@ Bold portion of text can be constructed as follows:
 
     *This will appear in bold*.
 
-Will produce:
+Bold text is transformed using <strong> tags.
 
-    <strong>This will appear in bold</strong>.
+Note 1: The star character will act as a 'bold' marker only when:
 
+- The "opening" star is preceded by whitespace or carriage return,
 
-Note 1: If you do not want the star to act as a 'bold'
-marker, you can do this using spacing. For example:
+- The "closing" star is followed by whitespace or carriage return,
+or punctuation immediately followed by whitespace or carriage return.
 
-    * This will not appear in bold *
-    3 * 3 = 9
+In other words, you can write 3*3*2 = 18 safely. The module tries to follow the
+DWIM ("Do What I Mean") philosophy as much as possible.
+
 
 Note 2: This can only work within one block level element.
 It will not work across paragraphs or lists.
@@ -339,11 +509,13 @@ Example 2:
    Nor in this one*.
 
 
-=head2 Emphasis / Italic
+=head2 Emphasis
 
 To emphasize a portion of text, use the following construct:
 
     /This is an emphasized portion of text/.
+
+Emphasis is transformed using <em> tags.
 
 Same notes as for bold / strong apply.
 

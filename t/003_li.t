@@ -20,7 +20,7 @@ Stuff stuff
 * another one
 EOF
 
-MKDoc::Text::Structured::_make_li();
+MKDoc::Text::Structured::_make_ul();
 
 like ($MKDoc::Text::Structured::Text, qr/<ul>/);
 like ($MKDoc::Text::Structured::Text, qr/<li>this<\/li>/);

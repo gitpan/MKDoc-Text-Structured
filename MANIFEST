@@ -13,7 +13,12 @@ t/004_ol.t
 t/005_strong.t
 t/006_em.t
 t/007_tokenize.t
+t/008_h1.y
 t/010_general.t
 t/011_list_and_bold.t
 t/012_list_carriage_return.t
 t/013_strong_and_em.t
+t/014_nested_li.t
+t/015_pre.t
+t/016_dl.t
+t/017_blockquote.t
