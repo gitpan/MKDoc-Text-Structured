@@ -1,3 +1,4 @@
+.cvsignore
 Changes
 lib/MKDoc/Text/Structured.pm
 lib/MKDoc/Text/Structured/Base.pm
@@ -32,3 +33,5 @@ t/012_spaces_only.t
 t/013_pre_sep.t
 t/014_niceties.t
 t/015_becky_marketeese.t
+t/016_uri.t
+t/017_entities_only.t

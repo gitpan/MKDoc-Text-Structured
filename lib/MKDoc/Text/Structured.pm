@@ -26,7 +26,7 @@ use strict;
 use warnings;
 
 our $Text    = '';
-our $VERSION = 0.8;
+our $VERSION = 0.81;
 
 
 sub process
@@ -209,6 +209,23 @@ Would become:
 
 Same notes as for bold / strong text also applied for emphasized text.
 
+=head2 Entity substitution
+
+Characters that would otherwise be interpreted as XML are encoded. i.e. &, <
+and > become &amp; &lt; and &gt;
+
+Additionally some standard typed versions of special characters are
+substituted with a richer and better-looking HTML entity:
+
+  --   surrounded by whitespace becomes &mdash;
+  -    surrounded by whitespace becomes &ndash;
+  ...  becomes &hellip;
+  (tm) becomes &trade;
+  (r)  becomes &reg;
+  (c)  becomes &copy;
+  x    between numbers becomes &times;
+  ''   surrounding text becomes &lsquo; &rsquo;
+  ""   surrounding text becomes &ldquo; &rdquo;
 
 =head1 Nested Structures
 
@@ -292,16 +309,17 @@ Would become:
 
 =head1 Hyperlinks
 
-This module doesn't do hyperlinks. However, once the XHTML fragment is
-produced, you can use L<MKDoc::XML::Tagger> to hyperlink it against a glossary
-of hyperlinks.
+This module uses L<URI::Find> to locate URIs such as http://mkdoc.com/ and turn
+them into clickable links.
 
+Additionally, once the XHTML fragment is produced, you could use
+L<MKDoc::XML::Tagger> to hyperlink it against a glossary of hyperlinks.
 
 =head1 AUTHOR
 
 Copyright 2003 - MKDoc Holdings Ltd.
 
-Author: Jean-Michel Hiver <jhiver@mkdoc.com>
+Author: Jean-Michel Hiver
 
 This module is free software and is distributed under the same license as Perl
 itself. Use it at your own risk.

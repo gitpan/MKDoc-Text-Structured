@@ -11,11 +11,11 @@ sub process
     local $Text;
     $Text = shift;
     $Text   =  " $Text ";
-    $Text   =~ s/&/&amp;/g;
-    $Text   =~ s/</&lt;/g;
-    $Text   =~ s/>/&gt;/g;
     $Text   =~ s/\n/ /gsm;
 
+    _make_entities();
+
+    $Text =~ s/&gt;/ &gt;/g;
     # automagically finds hyperlinks
     my $finder = URI::Find->new (
         sub {
@@ -24,15 +24,7 @@ sub process
         }
     );
     $finder->find (\$Text);
-
-    $Text =~ s/(?<=(?:\s|\n))--(?=(?:\s|\n))/\&mdash;/g;                                 # --    becomes em-dash 
-    $Text =~ s/(?<=(?:\s|\n))-(?=(?:\s|\n))/\&ndash;/g;                                  # -     becomes en-dash
-    $Text =~ s/(?<!\.)\.\.\.(?!\.)/\&hellip;/g;                                          # ...   becomes ellipsis
-
-    $Text =~ s/\(tm\)(?=(?:\s|\n|\p{IsPunct}))/\&trade;/gi;                              # (tm)  becomes trademark
-    $Text =~ s/\(r\)(?=(?:\s|\n|\p{IsPunct}))/\&reg;/gi;                                 # (r)   becomes registered
-    $Text =~ s/\(c\)(?=(?:\s|\n|\p{IsPunct}))/\&copy;/gi;                                # (c)   becomes copyright
-    $Text =~ s/(?<=(?:\s|\n))(\d+)\s*x\s*(\d+)(?=(?:\s|\n|\p{isPunct}))/$1\&times;$2/g;  # x     becomes dimension
+    $Text =~ s/ &gt;/&gt;/g;
 
     # abbreviations
     while ($Text =~ s/([[:upper:]][[:upper:]]+)\s+(\(.*?\))/_make_abbr_implicit ($1, $2)/e) {}; # implicit
@@ -45,6 +37,54 @@ sub process
     $Text =~ s/^ //;
     $Text =~ s/ $//;
     return $Text;
+}
+
+=pod
+
+=head2 Processing text without adding tags
+
+Example:
+
+  $title = "My (c) symbol shouldn't be *bold* -- or http://example.com/ 'linked'";
+  $title = MKDoc::Text::Structured::Inline::process_entities_only ($text);
+
+$title is now:
+
+  My &copy; symbol shouldn't be *bold* &mdash; or http://example.com/ &lsquo;linked&rsquo;
+
+=cut
+
+sub process_entities_only
+{
+    local $Text;
+    $Text = shift;
+    $Text = " $Text ";
+    $Text =~ s/\n/ /gsm;
+
+    _make_entities();
+    _make_simplequotes();
+    _make_doublequotes();
+    
+    $Text =~ s/^ //;
+    $Text =~ s/ $//;
+    return $Text;
+}
+
+
+sub _make_entities
+{
+    $Text   =~ s/&/&amp;/g;
+    $Text   =~ s/</&lt;/g;
+    $Text   =~ s/>/&gt;/g;
+
+    $Text =~ s/(?<=(?:\s|\n))--(?=(?:\s|\n))/\&mdash;/g;                                 # --    becomes em-dash 
+    $Text =~ s/(?<=(?:\s|\n))-(?=(?:\s|\n))/\&ndash;/g;                                  # -     becomes en-dash
+    $Text =~ s/(?<!\.)\.\.\.(?!\.)/\&hellip;/g;                                          # ...   becomes ellipsis
+
+    $Text =~ s/\(tm\)(?=(?:\s|\n|\p{IsPunct}))/\&trade;/gi;                              # (tm)  becomes trademark
+    $Text =~ s/\(r\)(?=(?:\s|\n|\p{IsPunct}))/\&reg;/gi;                                 # (r)   becomes registered
+    $Text =~ s/\(c\)(?=(?:\s|\n|\p{IsPunct}))/\&copy;/gi;                                # (c)   becomes copyright
+    $Text =~ s/(?<=(?:\s|\n))(\d+)\s*x\s*(\d+)(?=(?:\s|\n|\p{isPunct}))/$1\&times;$2/g;  # x     becomes dimension
 }
 
 
