@@ -26,7 +26,7 @@ use strict;
 use warnings;
 
 our $Text    = '';
-our $VERSION = 0.7;
+our $VERSION = 0.8;
 
 
 sub process
@@ -38,8 +38,13 @@ sub process
     $text =~ s/\r/\n/gs;
 
     # Trailing spaces -> fizzle!
-    $text =~ s/[\t ]+\n/\n/gs;
- 
+    # (except when the line is made only of trailing spaces...)
+    $text = join "\n", map {
+        chomp();
+        s/\s+$// unless (/^\s*$/);
+        $_;
+    } split /\n/, $text;
+
     my @lines   = split /\n/, $text;
     my @result  = ();
     my $current = undef;

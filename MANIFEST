@@ -29,3 +29,6 @@ t/008_blockquote.t
 t/010_ul.t
 t/011_ol.t
 t/012_spaces_only.t
+t/013_pre_sep.t
+t/014_niceties.t
+t/015_becky_marketeese.t

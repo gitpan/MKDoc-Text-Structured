@@ -27,6 +27,7 @@ sub is_ok
     my $line = shift;
     my $re   = $self->{indent_re};
     $line eq ''     and return 1;
+    $line =~ /^\s+$/ and return 1;
     $line =~ /^$re/ and return 1;
 
     my ($marker) = $line =~ /^(\d+\.\s+)/;

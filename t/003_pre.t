@@ -5,6 +5,12 @@ use lib qw (lib ../lib);
 use MKDoc::Text::Structured;
 
 my $text = <<EOF;
+* Hello
+  =====
+
+  Hello, World, this is test
+
+
 This is a paragraph,
 until it meets an empty line.
 
@@ -16,6 +22,8 @@ EOF
 
 my $res = MKDoc::Text::Structured::process ($text);
 
+like ($res, qr#<ul><li><h2>Hello</h2>#);
+like ($res, qr#<p>Hello, World, this is test</p></li></ul>#);
 like ($res, qr#<p>This is a paragraph,#);
 like ($res, qr#until it meets an empty line.</p>#);
 like ($res, qr#<pre>But this is pre-formatted text.#);

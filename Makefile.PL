@@ -7,6 +7,7 @@ WriteMakefile(
     'PREREQ_PM'		=> {
         'Test::More'    => '0.47',
         'Scalar::Util'  => '1.07',
+        'URI::Find'	=> '0.13',
     },
     ($] >= 5.005 ?    ## Add these new keywords supported since 5.005
       (ABSTRACT_FROM => 'lib/MKDoc/Text/Structured.pm', # retrieve abstract from module

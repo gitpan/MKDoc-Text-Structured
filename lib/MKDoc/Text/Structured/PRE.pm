@@ -10,6 +10,8 @@ sub new
     my $class  = shift;
     my $line = shift;
 
+    $line =~ s/^\s*$// and return;
+
     my ($indent) = $line =~ /^(\s+)/;
     return unless ($indent);
 
@@ -34,7 +36,12 @@ sub process
     my @lines  = @{$self->{lines}};
     my $indent = $self->{indent};
     my $text   = join "\n", map { s/^$indent//; $_ } @lines;
-    $text = MKDoc::Text::Structured::Inline::process ($text);
+
+    # minimal encoding since we don't want all
+    # the inline fluff
+    $text      =~ s/&/&amp;/g;
+    $text      =~ s/</&lt;/g;
+    $text      =~ s/>/&gt;/g;
 
     return "<pre>$text</pre>";
 }

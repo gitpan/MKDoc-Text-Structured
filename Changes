@@ -1,5 +1,11 @@
 Revision history for MKDoc::Text::Structured
 
+0.8 Thu Jul 22 17:51:30 2004
+    - Fixed Bruno's broken trailing spaces patch ;-)
+    - Changed <pre> to NOT do any inline stuff
+    - Added a lot of automagic niceties
+    - Fixed plenty of bugs
+
 0.7 Sun Jul 18 20:33:11 2004
     - Applied Bruno's trailing spaces killing patch
 

@@ -15,7 +15,7 @@ EOF
 my $res = MKDoc::Text::Structured::process ($text);
 like ($res, qr#<blockquote><blockquote><p>Hey, that\'s pretty cool!</p></blockquote>#);
 like ($res, qr#<p>Well, sort-of</p></blockquote>#);
-like ($res, qr#<p>I think it\'s pretty cool...</p>#);
+like ($res, qr#<p>I think it\'s pretty cool&hellip;</p>#);
 
 1;
 

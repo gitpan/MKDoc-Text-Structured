@@ -26,10 +26,10 @@ like ($res, qr#<ul><li><p>An item</p></li>#);
 like ($res, qr#<li><p>Another item</p></li>#);
 like ($res, qr#<li><h2>Headlines work too</h2>#);
 like ($res, qr#<p>I can write <strong>paragraphs within lists</strong>.</p>#);
-like ($res, qr#<pre>And even <em>pre-formatted text</em>!</pre>#);
+like ($res, qr#<pre>And even _pre-formatted text_!</pre>#);
 like ($res, qr#<ul><li><p>Also, I can have sub-lists</p></li>#);
 like ($res, qr#<li><p>That's no problem</p></li>#);
-like ($res, qr#<li><p>Notice that '\*' and '-' have the same meaning.#);
+like ($res, qr#<li><p>Notice that &lsquo;\*&rsquo; and &lsquo;-&rsquo; have the same meaning.#);
 like ($res, qr#It's just syntaxic sugar, really :-\)</p></li></ul></li></ul>#);
 
 1;
