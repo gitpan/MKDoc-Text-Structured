@@ -5,6 +5,42 @@ use strict;
 
 our $Text    = '';
 
+our $LongestWord = 78;
+our $NoFollow = 0;
+
+=head1 NAME
+
+MKDoc::Text::Structured::Inline - convert text to HTML without handling block-level tags
+
+=head1 SYNOPSIS
+
+  my $text = some_structured_text();
+  my $this = MKDoc::Text::Structured::Inline::process ($text);
+  my $that = MKDoc::Text::Structured::Inline::process_entities_only ($text);
+
+=head1 SUMMARY
+
+L<MKDoc::Text::Structured::Inline> is used by L<MKDoc::Text::Structured> to
+generate inline HTML elements such as hyperlinks, emphasis and entities.
+
+This module is also useful directly when the full block-level rendering of
+L<MKDoc::Text::Structured> is unwanted.
+
+=head1 USAGE
+
+=head2 Processing text and adding HTML tags
+
+For example, when processing text that is going to end up in an <h1> header,
+you wouldn't want any block level tags generated:
+
+  $header = "< My (c) symbol should be *bold* > -- and http://example.com/ 'linked'";
+  $header = MKDoc::Text::Structured::Inline::process ($title);
+
+$header is now:
+
+  &lt; My &copy; symbol should be <strong>bold</strong> &gt; &mdash; and <a href="http://example.com/">http://example.com/<a> &lsquo;linked&rsquo;
+
+=cut
 
 sub process
 {
@@ -20,7 +56,17 @@ sub process
     my $finder = URI::Find->new (
         sub {
             my ($uri, $orig_uri) = @_;
-            return qq|<a href="$uri">$orig_uri</a>|;
+            $orig_uri =~ s/^mailto://;
+
+            # http://googleblog.blogspot.com/2005/01/preventing-comment-spam.html
+            if ($NoFollow)
+            {
+                return qq|<a href="$uri" rel="nofollow">$orig_uri</a>|;
+            }
+            else
+            {
+                return qq|<a href="$uri">$orig_uri</a>|;
+            }
         }
     );
     $finder->find (\$Text);
@@ -33,6 +79,8 @@ sub process
     _make_doublequotes();
     _make_strong();
     _make_em();
+    _make_smilies();
+    _break_long_words();
 
     $Text =~ s/^ //;
     $Text =~ s/ $//;
@@ -43,14 +91,16 @@ sub process
 
 =head2 Processing text without adding tags
 
-Example:
+Another example, if you were processing text that will end up in an HTML
+<title> tag, this tag should never contain any other tags, so you should use
+the MKDoc::Text::Structured::Inline::process_entities_only() method:
 
-  $title = "My (c) symbol shouldn't be *bold* -- or http://example.com/ 'linked'";
-  $title = MKDoc::Text::Structured::Inline::process_entities_only ($text);
+  $title = "< My (c) symbol shouldn't be *bold* > -- or http://example.com/ 'linked'";
+  $title = MKDoc::Text::Structured::Inline::process_entities_only ($title);
 
 $title is now:
 
-  My &copy; symbol shouldn't be *bold* &mdash; or http://example.com/ &lsquo;linked&rsquo;
+  &lt; My &copy; symbol shouldn't be *bold* &mdash; &gt; or http://example.com/ &lsquo;linked&rsquo;
 
 =cut
 
@@ -64,6 +114,7 @@ sub process_entities_only
     _make_entities();
     _make_simplequotes();
     _make_doublequotes();
+    _break_long_words();
     
     $Text =~ s/^ //;
     $Text =~ s/ $//;
@@ -228,6 +279,40 @@ sub _make_em_wrap
     local $Text = $stuff;
     _make_strong ($Text);
     return "<em>$Text</em>";
+}
+
+
+sub _make_smilies
+{
+    $Text = join '', map {
+	my $stuff = $_;
+        $stuff =~ s/:-\)/<span class="smiley-happy">:-)<\/span>/g unless ($stuff =~ /^</);
+        $stuff =~ s/:-\(/<span class="smiley-sad">:-(<\/span>/g unless ($stuff =~ /^</);
+        # don't do ;-) think about what happens with &-)
+        $stuff;
+    } _tokenize ($Text);
+}
+
+
+sub _break_long_words
+{
+    $Text = join '', map {
+	my $stuff = $_;
+        $stuff = _insert_spaces ($stuff, $LongestWord) unless ($stuff =~ /^</);
+	$stuff;
+    } _tokenize ($Text);
+}
+
+
+sub _insert_spaces
+{
+    my $text = shift;
+    my $length = shift || return $text;
+    # we can break continuous non-space text after "/", ";" or "-"
+    $text =~ s/(\S{$length}[\/;-])(?=\S)/$1 /g;
+    # we can break continuous non-space text so long as it doesn't contain an ampersand
+    $text =~ s/([^[:space:]&]{$length})(?=\S)/$1 /g;
+    return $text;
 }
 
 

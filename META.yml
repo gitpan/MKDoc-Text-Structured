@@ -1,10 +1,11 @@
 # http://module-build.sourceforge.net/META-spec.html
 #XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
 name:         MKDoc-Text-Structured
-version:      0.82
+version:      0.83
 version_from: lib/MKDoc/Text/Structured.pm
 installdirs:  site
 requires:
+    Getopt::Declare:               
     Scalar::Util:                  1.07
     Test::More:                    0.47
     URI::Find:                     0.13

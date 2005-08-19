@@ -26,7 +26,7 @@ use strict;
 use warnings;
 
 our $Text    = '';
-our $VERSION = 0.82;
+our $VERSION = 0.83;
 
 
 sub process
@@ -312,8 +312,30 @@ Would become:
 This module uses L<URI::Find> to locate URIs such as http://mkdoc.com/ and turn
 them into clickable links.
 
+Add rel="nofollow" attributes to <a> tags like so:
+
+  local $MKDoc::Text::Structured::Inline::NoFollow = 1;
+
 Additionally, once the XHTML fragment is produced, you could use
 L<MKDoc::XML::Tagger> to hyperlink it against a glossary of hyperlinks.
+
+=head1 Smilies
+
+Basic smilies such as :-) and :-( are wrapped in a CSS class:
+
+  <span class="smiley-happy">:-)</span>
+  <span class="smiley-sad">:-(</span>
+
+=head1 Long Words
+
+Long words are split up into fragments separated by spaces if the length
+exceeds a 78 character default.
+
+Change the default length using a package variable:
+
+  local $MKDoc::Text::Structured::Inline::LongestWord = 12;
+
+Disable this fuctionality by setting a value of 0.
 
 =head1 AUTHOR
 

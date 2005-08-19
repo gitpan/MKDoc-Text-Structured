@@ -1,5 +1,14 @@
 Revision history for MKDoc::Text::Structured
 
+0.83 Fri Aug 19 17:15:00 2005
+    - fix for <pre> indenting bug when first line is more indented than second
+    - method to insert spaces into long words
+    - strip mailto: when linking and displaying email addresses
+    - documented MKDoc::Text::Structured::Inline
+    - wrap smilies in CSS classes
+    - Added support for <a rel="nofollow" href="...
+    - Added basic text2xhtml command line tool
+
 0.82 Thu Mar 31 13:45:00 2005
     - fixed failure to change " to &quot; bug
 

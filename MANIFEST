@@ -1,4 +1,5 @@
 .cvsignore
+bin/text2xhtml
 Changes
 lib/MKDoc/Text/Structured.pm
 lib/MKDoc/Text/Structured/Base.pm
@@ -35,3 +36,8 @@ t/014_niceties.t
 t/015_becky_marketeese.t
 t/016_uri.t
 t/017_entities_only.t
+t/018_pre_indented.t
+t/019_insert_spaces.t
+t/020_mailto.t
+t/021_smilies.t
+t/022_nofollow.t

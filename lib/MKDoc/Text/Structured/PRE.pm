@@ -25,8 +25,7 @@ sub is_ok
 {
     my $self = shift;
     my $line = shift;
-    my $indent = $self->{indent};
-    return $line =~ /^$indent/;
+    return $line =~ /^\s/;
 }
 
 
@@ -35,6 +34,11 @@ sub process
     my $self   = shift;
     my @lines  = @{$self->{lines}};
     my $indent = $self->{indent};
+    for (@lines)
+    {
+        my ($_indent) = $_ =~ /^(\s+)/;
+        $indent = $_indent if (length ($_indent) lt length ($indent));
+    }
     my $text   = join "\n", map { s/^$indent//; $_ } @lines;
 
     # minimal encoding since we don't want all
